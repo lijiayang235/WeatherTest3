@@ -23,6 +23,7 @@ public class Utility {
                 province.setProvinceName(jsonObject.getString("name"));
                 province.save();
             }
+            return true;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -40,6 +41,7 @@ public class Utility {
                 city.setProvinceCode(provinceCode);
                 city.save();
             }
+            return true;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -58,6 +60,7 @@ public class Utility {
                 county.setCityCode(cityCode);
                 county.save();
             }
+            return true;
 
         } catch (JSONException e) {
             e.printStackTrace();
