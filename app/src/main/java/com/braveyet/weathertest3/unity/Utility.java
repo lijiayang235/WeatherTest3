@@ -3,6 +3,8 @@ package com.braveyet.weathertest3.unity;
 import com.braveyet.weathertest3.db.City;
 import com.braveyet.weathertest3.db.County;
 import com.braveyet.weathertest3.db.Province;
+import com.braveyet.weathertest3.gson.Weather;
+import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -66,5 +68,16 @@ public class Utility {
             e.printStackTrace();
         }
         return  false;
+    }
+    public static Weather handleWeather(String responseText){
+        try {
+            JSONObject jsonObject=new JSONObject(responseText);
+            JSONArray jsonArray=jsonObject.getJSONArray("HeWeather");
+           String weatherText=jsonArray.getJSONObject(0).toString();
+            return new Gson().fromJson(weatherText,Weather.class);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

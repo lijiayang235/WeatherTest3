@@ -1,5 +1,7 @@
 package com.braveyet.weathertest3.fragment;
 
+import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -14,7 +16,9 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.braveyet.weathertest3.MainActivity;
 import com.braveyet.weathertest3.R;
+import com.braveyet.weathertest3.WeatherActivity;
 import com.braveyet.weathertest3.db.City;
 import com.braveyet.weathertest3.db.County;
 import com.braveyet.weathertest3.db.Province;
@@ -52,6 +56,7 @@ public class ChooseArea extends Fragment {
     public City selectCity;
     public County selectCounty;
     public  int currentLevel;
+    public ProgressDialog progressDialog;
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -59,6 +64,7 @@ public class ChooseArea extends Fragment {
         backButton= (Button) view.findViewById(R.id.back_button);
         titleText= (TextView) view.findViewById(R.id.title_text);
         listView= (ListView) view.findViewById(R.id.listview);
+
         adapter=new ArrayAdapter<String>(getContext(),android.R.layout.simple_list_item_1,datalist);
         listView.setAdapter(adapter);
         return view;
@@ -88,6 +94,19 @@ public class ChooseArea extends Fragment {
                    queryCounty();
                }else if(currentLevel==LEVEL_COUNTY){
                    selectCounty=countyList.get(position);
+                   if(getActivity() instanceof MainActivity){
+                       Intent intent=new Intent(getContext(), WeatherActivity.class);
+                       intent.putExtra("weatherId",selectCounty.weatherId);
+                       startActivity(intent);
+                       getActivity().finish();
+                   }else if(getActivity() instanceof WeatherActivity){
+                       WeatherActivity activity= (WeatherActivity) getActivity();
+                       activity.swipeLayout.setRefreshing(true);
+                       activity.requestWeather(selectCounty.weatherId);
+                       activity.drawerLayout.closeDrawers();
+                   }
+
+
 
                }
             }
@@ -117,13 +136,14 @@ public class ChooseArea extends Fragment {
     }
 
     private void queryFromServer(String address, final String type) {
+        showProgressDialog();
         HttpUtil.sendOkHttp3(address, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-
+                        closeProgressDialog();
                         Toast.makeText(getContext(),"获取城市失败",Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -131,7 +151,7 @@ public class ChooseArea extends Fragment {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-
+                closeProgressDialog();
                 String responseText=response.body().string();
 
                 boolean access=false;
@@ -203,4 +223,18 @@ public class ChooseArea extends Fragment {
         }
     }
 
+    public void showProgressDialog(){
+        if(progressDialog==null){
+            progressDialog=new ProgressDialog(getActivity());
+            progressDialog.setMessage("正在加载");
+            progressDialog.setCanceledOnTouchOutside(false);;
+        }
+        progressDialog.show();
+
+    }
+    public void closeProgressDialog(){
+        if(progressDialog!=null){
+            progressDialog.dismiss();
+        }
+    }
 }
