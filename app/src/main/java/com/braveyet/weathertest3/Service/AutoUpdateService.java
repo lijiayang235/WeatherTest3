@@ -9,6 +9,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.AlarmClock;
+import android.util.Log;
 
 import com.braveyet.weathertest3.gson.Weather;
 import com.braveyet.weathertest3.unity.HttpUtil;
@@ -31,6 +32,7 @@ public class AutoUpdateService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d("myTest","onStartCommand");
         updateBingPic();
         updateWeather();
         AlarmManager alarm= (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -39,6 +41,7 @@ public class AutoUpdateService extends Service {
         PendingIntent pi=PendingIntent.getService(this,0,i,0);
         alarm.cancel(pi);
         long hours=8*60*60*1000;
+
         long triggertime= SystemClock.elapsedRealtime()+hours;
         alarm.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggertime,pi);
         return super.onStartCommand(intent, flags, startId);

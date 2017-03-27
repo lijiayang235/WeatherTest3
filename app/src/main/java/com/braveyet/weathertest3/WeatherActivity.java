@@ -11,6 +11,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -97,9 +98,14 @@ public class WeatherActivity extends AppCompatActivity {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         String reponseText = preferences.getString("weather", null);
         if (reponseText != null) {
+            Log.d("myTest",reponseText);
+
             Weather weather = Utility.handleWeather(reponseText);
-            weatherId = weather.basic.weatherId;
+            if(weather.status.equals("ok")){
+                weatherId = weather.basic.weatherId;
             showWeather(weather);
+        }
+
         } else {
             weatherLayout.setVisibility(View.GONE);
             weatherId = getIntent().getStringExtra("weatherId");
@@ -155,7 +161,7 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         swipeLayout.setRefreshing(false);
-                        Toast.makeText(WeatherActivity.this, "获取天气数据失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(WeatherActivity.this, "到网址获取天气数据失败", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -170,11 +176,12 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         swipeLayout.setRefreshing(false);
-                        if (weather != null && weather.status.equals("ok")) {
+                        if (weather != null &&weather.equals("ok")) {
                             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
                             editor.putString("weather", responseText);
                             editor.apply();
                             weatherId = weather.basic.weatherId;
+
                             showWeather(weather);
                             Intent intent=new Intent(WeatherActivity.this, AutoUpdateService.class);
                             startService(intent);
